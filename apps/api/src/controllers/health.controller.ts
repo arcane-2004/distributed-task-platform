@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
+import { getHealthStatus } from "../services/health.service.js";
 
 export const getHealth = (req: Request, res: Response) => {
-  res.status(200).json({
-    success: true,
-    message: "Distributed Task Processing API is running 🚀",
-  });
+  const data = getHealthStatus();
+
+  res.status(200).json(data);
 };
