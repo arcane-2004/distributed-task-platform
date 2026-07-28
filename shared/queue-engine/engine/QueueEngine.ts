@@ -1,0 +1,70 @@
+import Redis from "ioredis";
+import { v4 as uuidv4 } from "uuid";
+
+import { JobStore } from "../stores/JobStore.js";
+import { Queue } from "../queue/Queue.js";
+import { JobPriority } from "../enums/JobPriority.js";
+import { JobStatus } from "../enums/JobStatus.js";
+
+import { Job } from "../models/Job.js";
+import { SubmitJobRequest } from "../models/SubmitJobRequest.js";
+
+
+
+
+export class QueueEngine {
+
+    private readonly jobStore: JobStore;
+
+    private readonly queue: Queue;
+
+    constructor(
+        private readonly redis: Redis,
+        private readonly queueName: string
+    ) {
+        this.jobStore = new JobStore(redis);
+
+        this.queue = new Queue(
+            redis,
+            queueName
+        );
+    }
+
+
+    async submit(
+        request: SubmitJobRequest
+    ): Promise<Job> {
+        const now = new Date();
+
+        const job: Job = {
+            id: uuidv4(),
+
+            type: request.type,
+
+            queue: this.queueName,
+
+            payload: request.payload,
+
+            status: JobStatus.QUEUED,
+
+            priority: request.priority ?? JobPriority.NORMAL,
+
+            attempts: 0,
+
+            maxAttempts: request.maxAttempts ?? 3,
+
+            progress: 0,
+
+            createdAt: now,
+
+            updatedAt: now
+        };
+        await this.jobStore.create(job);
+
+        await this.queue.enqueue(job.id);
+
+        return job;
+    }
+
+
+}
