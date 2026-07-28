@@ -66,5 +66,9 @@ export class QueueEngine {
         return job;
     }
 
-
+    async getJob(
+        jobId: string
+    ): Promise<Job | null> {
+        return await this.jobStore.findById(jobId);
+    }
 }
