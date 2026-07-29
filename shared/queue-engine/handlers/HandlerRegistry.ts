@@ -5,7 +5,17 @@ export class HandlerRegistry {
 
     private readonly handlers = new Map<JobType, JobHandler>();
 
-    register(jobType: JobType, handler: JobHandler): void {
+    register(
+        jobType: JobType,
+        handler: JobHandler
+    ): void {
+
+        if (this.handlers.has(jobType)) {
+            throw new Error(
+                `Handler already registered for ${jobType}`
+            );
+        }
+
         this.handlers.set(jobType, handler);
     }
 
