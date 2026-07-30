@@ -71,4 +71,15 @@ export class QueueEngine {
     ): Promise<Job | null> {
         return await this.jobStore.findById(jobId);
     }
+
+    async getNextJobId(): Promise<string | null> {
+        return await this.queue.dequeue();
+    }
+
+    async updateJob(
+        jobId: string,
+        updates: Partial<Job>
+    ): Promise<void> {
+        await this.jobStore.update(jobId, updates);
+    }
 }
