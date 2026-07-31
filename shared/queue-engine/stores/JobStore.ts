@@ -5,6 +5,7 @@ import { JobMapper } from "../mappers/JobMapper.js";
 import { RedisJobHash } from "../types/RedisJobHash.js";
 
 export class JobStore {
+
     private toRedisJobHash(
         hash: Record<string, string>
     ): RedisJobHash {
@@ -13,7 +14,7 @@ export class JobStore {
 
     constructor(
         private readonly redis: Redis
-    ) {}
+    ) { }
 
     private getKey(jobId: string): string {
         return RedisKeys.job(jobId);
@@ -28,7 +29,6 @@ export class JobStore {
     }
 
 
-
     async create(job: Job): Promise<void> {
         if (await this.exists(job.id)) {
             throw new Error(`Job ${job.id} already exists`);
@@ -38,9 +38,15 @@ export class JobStore {
 
         const redisJob = JobMapper.toRedis(job);
 
-        await this.redis.hset(key, redisJob);
+        const filteredJob = Object.fromEntries(
+            Object.entries(redisJob).filter(
+                ([_, value]) => value !== undefined
+            )
+        );
+
+        await this.redis.hset(key, filteredJob);
     }
-    
+
     async findById(jobId: string): Promise<Job | null> {
         const key = this.getKey(jobId);
 
@@ -74,6 +80,12 @@ export class JobStore {
 
         const redisJob = JobMapper.toRedis(updatedJob);
 
+        const filteredJob = Object.fromEntries(
+            Object.entries(redisJob).filter(
+                ([_, value]) => value !== undefined
+            )
+        );
+
         await this.redis.hset(
             this.getKey(jobId),
             redisJob
@@ -85,7 +97,7 @@ export class JobStore {
 
         await this.redis.del(key);
     }
-    
+
 }
 
 
