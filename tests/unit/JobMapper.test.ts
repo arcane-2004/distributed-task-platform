@@ -1,9 +1,6 @@
 import { describe, it, expect } from "vitest";
 
 import { JobMapper } from "../../shared/queue-engine/mappers/JobMapper.js";
-// import { JobStatus } from "../../shared/queue-engine/models/JobStatus.js";
-// import { JobPriority } from "../../shared/queue-engine/models/JobPriority.js";
-// import { JobType } from "../../shared/queue-engine/models/JobType.js";
 import { Job } from "../../shared/queue-engine/models/Job.js";
 import { JobType } from "../../shared/queue-engine/enums/JobType.js";
 import { JobStatus } from "../../shared/queue-engine/enums/JobStatus.js";
