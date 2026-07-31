@@ -70,7 +70,7 @@ export class JobMapper {
             progress: Number(hash.progress),
 
             result:
-                hash.result !== undefined
+                hash.result
                     ? JSON.parse(hash.result)
                     : undefined,
 
