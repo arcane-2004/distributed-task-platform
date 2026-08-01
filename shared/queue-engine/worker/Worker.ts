@@ -5,7 +5,7 @@ import { HandlerRegistry } from "../handlers/HandlerRegistry.js";
 export class Worker {
 
     private running = false;
-    private readonly pollingIntervalMs = 1000;
+    
 
     private async sleep(
         ms: number
@@ -16,6 +16,7 @@ export class Worker {
     }
 
     constructor(
+        private readonly pollingIntervalMs = 1000,
         private readonly queueEngine: QueueEngine,
         private readonly registry: HandlerRegistry
     ) {}
