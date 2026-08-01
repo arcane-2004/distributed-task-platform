@@ -39,10 +39,6 @@ export class Worker {
         
         const now = new Date();
 
-        job.status = JobStatus.RUNNING;
-        job.startedAt = now;
-        job.updatedAt = now;
-
         await this.queueEngine.updateJob(job.id, {
             status: job.status,
             startedAt: job.startedAt,
@@ -50,6 +46,10 @@ export class Worker {
         });
         
         try {
+            job.status = JobStatus.RUNNING;
+            job.startedAt = now;
+            job.updatedAt = now;
+
             const handler = this.registry.get(job.type);  // ----- getting handler ------
             await handler.execute(job);
             await this.queueEngine.updateJob(
