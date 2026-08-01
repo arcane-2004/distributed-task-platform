@@ -15,10 +15,10 @@ export class Worker {
         });
     }
 
-    constructor(
-        private readonly pollingIntervalMs = 1000,
+    constructor(   
         private readonly queueEngine: QueueEngine,
-        private readonly registry: HandlerRegistry
+        private readonly registry: HandlerRegistry,
+        private readonly pollingIntervalMs = 1000,
     ) {}
 
     // ========/ processing one job only /=========
