@@ -36,8 +36,6 @@ export class Worker {
             return;
         }
 
-       
-        const handler = this.registry.get(job.type);  // ----- getting handler ------
         
         const now = new Date();
 
@@ -52,7 +50,7 @@ export class Worker {
         });
         
         try {
-
+            const handler = this.registry.get(job.type);  // ----- getting handler ------
             await handler.execute(job);
             await this.queueEngine.updateJob(
                 job.id,
