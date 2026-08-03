@@ -1,8 +1,8 @@
-import { Job } from "../models/Job";
-import { RedisJobHash } from "../types/RedisJobHash";
-import {JobType} from "../enums/JobType"
-import {JobPriority} from "../enums/JobPriority"
-import {JobStatus} from "../enums/JobStatus"
+import { Job } from "../models/Job.js";
+import { RedisJobHash } from "../types/RedisJobHash.js";
+import {JobType} from "../enums/JobType.js"
+import {JobPriority} from "../enums/JobPriority.js"
+import {JobStatus} from "../enums/JobStatus.js"
 
 export class JobMapper {
 
