@@ -1,6 +1,6 @@
 import express, {Express} from "express";
 import cors from "cors";
-import routes from "./routes/index.js";
+import jobsRouter from "./routes/jobs.js";
 
 const app: Express = express();
 
@@ -8,7 +8,7 @@ const app: Express = express();
 app.use(cors());
 app.use(express.json());
 
-// Health Check Route
+// Check Route
 app.get("/", (req, res) => {
   res.json({
     success: true,
@@ -16,6 +16,7 @@ app.get("/", (req, res) => {
   });
 });
 
-app.use("/api", routes);
+
+app.use("/jobs", jobsRouter);
 
 export default app;
