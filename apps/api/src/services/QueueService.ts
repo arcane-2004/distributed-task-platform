@@ -13,4 +13,12 @@ export class QueueService {
 
     }
 
+    async getJob(
+        jobId: string
+    ): Promise<Job | null> {
+
+        return await queueEngine.getJob(jobId);
+
+    }
+
 }

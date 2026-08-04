@@ -11,4 +11,9 @@ router.post(
     jobController.submitJob.bind(jobController)
 );
 
+router.get(
+    "/:id",
+    jobController.getJob.bind(jobController)
+);
+
 export default router;
