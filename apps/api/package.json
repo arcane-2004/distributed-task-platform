@@ -17,8 +17,7 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "ioredis": "^5.11.1",
-    "@platform/queue-engine": "workspace:*"
+    "ioredis": "^5.11.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
