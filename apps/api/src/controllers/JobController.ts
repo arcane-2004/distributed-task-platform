@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 
 import { QueueService } from "../services/QueueService.js";
 
@@ -9,42 +9,56 @@ export class JobController {
 
     constructor(
         private readonly queueService = new QueueService()
-    ) {}
+    ) { }
 
     async submitJob(
         req: Request,
-        res: Response
+        res: Response,
+        next: NextFunction
     ): Promise<void> {
 
-        const job = await this.queueService.submitJob(
-            req.body
-        );
+        try {
 
-        res.status(201).json({
-            id: job.id,
-            status: job.status
-        });
+            const job = await this.queueService.submitJob(
+                req.body
+            );
+
+            res.status(201).json({
+                id: job.id,
+                status: job.status
+            });
+
+        } catch (error) {
+            next(error);
+        }
 
     }
 
     async getJob(
-    req: Request<JobParams>,
-    res: Response
+        req: Request<JobParams>,
+        res: Response,
+        next: NextFunction
     ): Promise<void> {
 
-        const job = await this.queueService.getJob(
-            req.params.id
-        );
+        try {
 
-        if (!job) {
-            res.status(404).json({
-                message: "Job not found"
-            });
+            const job = await this.queueService.getJob(
+                req.params.id
+            );
 
-            return;
+            if (!job) {
+                res.status(404).json({
+                    message: "Job not found"
+                });
+
+                return;
+            }
+
+            res.status(200).json(job);
+
+        } catch (error) {
+            next(error);
         }
-
-        res.status(200).json(job);
 
     }
 

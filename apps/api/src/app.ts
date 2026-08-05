@@ -1,6 +1,7 @@
 import express, {Express} from "express";
 import cors from "cors";
 import jobsRouter from "./routes/jobs.js";
+import { errorHandler } from "./middleware/errorHandler.js";
 
 const app: Express = express();
 
@@ -18,5 +19,9 @@ app.get("/", (req, res) => {
 
 
 app.use("/jobs", jobsRouter);
+
+
+// -----/ register error handler /---------
+app.use(errorHandler);
 
 export default app;
