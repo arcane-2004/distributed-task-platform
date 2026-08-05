@@ -1,9 +1,7 @@
-import dotenv from "dotenv";
+
 import app from "./app.js";
 import { queueEngine } from "./config/queueEngine.js";
 import { redis } from "./config/redis.js";
-
-dotenv.config();
 
 const PORT = process.env.PORT ;
 
