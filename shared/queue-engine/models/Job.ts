@@ -1,15 +1,15 @@
-import { JobStatus } from "../enums/JobStatus";
-import { JobPriority } from "../enums/JobPriority";
-import { JobType } from "../enums/JobType";
+import { JobStatus } from "../enums/JobStatus.js";
+import { JobPriority } from "../enums/JobPriority.js";
+import { JobType } from "../enums/JobType.js";
 
-export interface Job {
+export interface Job<T = unknown> {
     id: string;
 
     type: JobType;
 
     queue: string;
 
-    payload: unknown;
+    payload: T;
 
     status: JobStatus;
 
