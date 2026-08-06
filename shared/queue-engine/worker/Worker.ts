@@ -19,6 +19,7 @@ export class Worker {
         private readonly queueEngine: QueueEngine,
         private readonly registry: HandlerRegistry,
         private readonly pollingIntervalMs = 1000,
+        private readonly retryDelayMs = 3000,
     ) { }
 
     // ========/ processing one job only /=========
@@ -42,7 +43,7 @@ export class Worker {
         job.status = JobStatus.RUNNING;
         job.startedAt = now;
         job.updatedAt = now;
-        
+
         await this.queueEngine.updateJob(job.id, {
             status: job.status,
             startedAt: job.startedAt,
