@@ -91,9 +91,23 @@ export class Worker {
                 }
             );
 
-            await this.sleep(this.retryDelayMs);
+            if (job.attempts < job.maxAttempts) {
 
-            await this.queueEngine.enqueueJob(job.id);
+                console.log(
+                    `Retrying job ${job.id} (${job.attempts}/${job.maxAttempts})`
+                );
+
+                await this.sleep(this.retryDelayMs);
+
+                await this.queueEngine.enqueueJob(job.id);
+
+            } else {
+
+                console.log(
+                    `Job ${job.id} exhausted all retry attempts.`
+                );
+
+            }
         }
 
     }
