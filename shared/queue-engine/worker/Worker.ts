@@ -5,7 +5,7 @@ import { HandlerRegistry } from "../handlers/HandlerRegistry.js";
 export class Worker {
 
     private running = false;
-    
+
 
     private async sleep(
         ms: number
@@ -15,11 +15,11 @@ export class Worker {
         });
     }
 
-    constructor(   
+    constructor(
         private readonly queueEngine: QueueEngine,
         private readonly registry: HandlerRegistry,
         private readonly pollingIntervalMs = 1000,
-    ) {}
+    ) { }
 
     // ========/ processing one job only /=========
     async processOneJob(): Promise<void> {
@@ -36,7 +36,7 @@ export class Worker {
             return;
         }
 
-        
+
         const now = new Date();
 
         await this.queueEngine.updateJob(job.id, {
@@ -44,14 +44,25 @@ export class Worker {
             startedAt: job.startedAt,
             updatedAt: job.updatedAt
         });
-        
+
         try {
             job.status = JobStatus.RUNNING;
             job.startedAt = now;
             job.updatedAt = now;
 
             const handler = this.registry.get(job.type);  // ----- getting handler ------
-            await handler.execute(job);
+
+
+            await handler.execute(
+                job,
+                async (progress: number) => {
+                    await this.queueEngine.updateProgress(
+                        job.id,
+                        progress
+                    );
+                }
+            );
+            
             await this.queueEngine.updateJob(
                 job.id,
                 {
