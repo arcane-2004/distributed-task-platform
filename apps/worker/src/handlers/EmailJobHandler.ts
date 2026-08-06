@@ -16,13 +16,18 @@ export class EmailJobHandler implements JobHandler {
         });
     }
 
-    async execute(job: Job<EmailPayload>): Promise<void> {
+    async execute(
+        job: Job<EmailPayload>,
+        updateProgress: (progress: number) => Promise<void>
+    ): Promise<void> {
 
         const {
             to,
             subject,
             body
         } = job.payload;
+
+        await updateProgress(0);
 
         console.log("=================================");
         console.log("Processing Email Job");
@@ -31,15 +36,24 @@ export class EmailJobHandler implements JobHandler {
         console.log(`Subject: ${subject}`);
         console.log("=================================");
 
-        console.log("Preparing email...");
 
-        await this.sleep(3000);
+        console.log("Preparing email...");
+        await this.sleep(1000);
+        await updateProgress(25);
 
         console.log("Connecting to email provider...");
-
         await this.sleep(2000);
+        await updateProgress(50);
+
+        console.log("Sending email...");
+        await this.sleep(1000);
+        await updateProgress(75);
+
+        console.log("Waiting for confirmation...");
+        await this.sleep(1000);
 
         console.log("Email sent successfully.");
+        await updateProgress(100);
 
     }
 
