@@ -76,9 +76,13 @@ export class Worker {
             );
 
         } catch (error) {
+
+            job.attempts++;
+            
             await this.queueEngine.updateJob(
                 job.id,
                 {
+                    attempts: job.attempts,
                     status: JobStatus.FAILED,
                     error: error instanceof Error
                         ? error.message
