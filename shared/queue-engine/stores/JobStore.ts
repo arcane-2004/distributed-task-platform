@@ -1,4 +1,4 @@
-import Redis from "ioredis";
+import {Redis }from "ioredis";
 import { RedisKeys } from "../keys/RedisKeys.js";
 import { Job } from "../models/Job.js";
 import { JobMapper } from "../mappers/JobMapper.js";
@@ -88,7 +88,7 @@ export class JobStore {
 
         await this.redis.hset(
             this.getKey(jobId),
-            redisJob
+            filteredJob
         );
     }
 
