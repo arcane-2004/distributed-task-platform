@@ -8,6 +8,14 @@ interface EmailPayload {
 }
 export class EmailJobHandler implements JobHandler {
 
+    private async sleep(
+        ms: number
+    ): Promise<void> {
+        return new Promise(resolve => {
+            setTimeout(resolve, ms);
+        });
+    }
+
     async execute(job: Job<EmailPayload>): Promise<void> {
 
         const {
@@ -25,7 +33,13 @@ export class EmailJobHandler implements JobHandler {
 
         console.log("Preparing email...");
 
-        console.log("Email prepared successfully.");
+        await this.sleep(3000);
+
+        console.log("Connecting to email provider...");
+
+        await this.sleep(2000);
+
+        console.log("Email sent successfully.");
 
     }
 
