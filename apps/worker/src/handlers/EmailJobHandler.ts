@@ -9,7 +9,6 @@ export class EmailJobHandler implements JobHandler {
 
         console.log("Processing EMAIL job:");
         console.log(job);
-
     }
 
 }
