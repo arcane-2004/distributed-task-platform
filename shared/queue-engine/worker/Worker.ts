@@ -78,7 +78,7 @@ export class Worker {
         } catch (error) {
 
             job.attempts++;
-            
+
             await this.queueEngine.updateJob(
                 job.id,
                 {
@@ -90,6 +90,10 @@ export class Worker {
                     updatedAt: new Date()
                 }
             );
+
+            await this.sleep(this.retryDelayMs);
+
+            await this.queueEngine.enqueueJob(job.id);
         }
 
     }

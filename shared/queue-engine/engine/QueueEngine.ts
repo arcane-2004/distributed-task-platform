@@ -106,4 +106,11 @@ export class QueueEngine {
             }
         );
     }
+
+    // -----/ enqueue job /--------
+    async enqueueJob(
+        jobId: string
+    ): Promise<void> {
+        await this.queue.enqueue(jobId);
+    }
 }
