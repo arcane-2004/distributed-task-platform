@@ -113,4 +113,27 @@ export class QueueEngine {
     ): Promise<void> {
         await this.queue.enqueue(jobId);
     }
+
+    // -----/ cancle job ------/
+    async cancelJob(jobId: string): Promise<void> {
+
+        const job = await this.getJob(jobId);
+
+        if (!job) {
+            throw new Error(
+                `Job ${jobId} not found`
+            );
+        }
+
+        if (job.status !== JobStatus.QUEUED) {
+            throw new Error(
+                `Job ${jobId} cannot be cancelled because its status is ${job.status}`
+            );
+        }
+
+        await this.updateJob(jobId, {
+            status: JobStatus.CANCELLED,
+            updatedAt: new Date()
+        });
+    }
 }
