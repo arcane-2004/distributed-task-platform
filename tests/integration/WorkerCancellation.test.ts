@@ -1,6 +1,13 @@
 import { Redis } from "ioredis";
 
-import { beforeEach, afterEach, describe, expect, it } from "vitest";
+import {
+    beforeEach,
+    afterEach,
+    describe,
+    expect,
+    it
+} from "vitest";
+
 import { QueueEngine } from "../../shared/queue-engine/engine/QueueEngine.js";
 import { Worker } from "../../shared/queue-engine/worker/Worker.js";
 import { HandlerRegistry } from "../../shared/queue-engine/handlers/HandlerRegistry.js";
@@ -9,13 +16,15 @@ import { JobPriority } from "../../shared/queue-engine/enums/JobPriority.js";
 import { FailingJobHandler } from "../../apps/worker/src/handlers/FailingJobHandler.js";
 import { FlakyJobHandler } from "../../apps/worker/src/handlers/FlakyJobHandler.js";
 import { JobStatus } from "../../shared/queue-engine/enums/JobStatus.js";
+import { CancellationTestHandler } from "../fixtures/CancellationTestHandler.js";
 
-describe("Worker Retry", () => {
+describe("Worker Cancellation", () => {
 
     let redis: Redis;
     let queueEngine: QueueEngine;
     let registry: HandlerRegistry;
     let worker: Worker;
+    let cancellationHandler: CancellationTestHandler;
 
     beforeEach(async () => {
 
@@ -33,9 +42,11 @@ describe("Worker Retry", () => {
             new FailingJobHandler()
         );
 
+        cancellationHandler = new CancellationTestHandler();
+
         registry.register(
             JobType.FLAKY_TEST,
-            new FlakyJobHandler(2)
+            cancellationHandler
         );
 
         worker = new Worker(
@@ -68,8 +79,34 @@ describe("Worker Retry", () => {
 
         expect(cancelledJob).not.toBeNull();
         expect(cancelledJob?.status).toBe(JobStatus.CANCELLED);
+
+        const nextJobId = await queueEngine.getNextJobId();
+
+        expect(nextJobId).toBeNull();
     });
 
+    it("should not execute a cancelled job", async () => {
+
+        const job = await queueEngine.submit({
+            type: JobType.FLAKY_TEST,
+            payload: {
+                message: "cancelled execution test"
+            },
+            priority: JobPriority.NORMAL,
+            maxAttempts: 3
+        });
+
+        await queueEngine.cancelJob(job.id);
+
+        await worker.processOneJob();
+
+        expect(cancellationHandler.executed).toBe(false);
+
+        const cancelledJob = await queueEngine.getJob(job.id);
+
+        expect(cancelledJob).not.toBeNull();
+        expect(cancelledJob?.status).toBe(JobStatus.CANCELLED);
+    });
 
     afterEach(async () => {
         await redis.flushdb();
@@ -77,3 +114,4 @@ describe("Worker Retry", () => {
     });
 
 });
+
