@@ -71,6 +71,7 @@ export class Worker {
                 {
                     status: JobStatus.COMPLETED,
                     completedAt: new Date(),
+                    error: undefined,
                     updatedAt: new Date()
                 }
             );

@@ -7,8 +7,6 @@ import { JobType } from "../../../shared/queue-engine/enums/JobType.js";
 import { Worker } from "../../../shared/queue-engine/worker/Worker.js";
 
 import { EmailJobHandler } from "./handlers/EmailJobHandler.js";
-import { FailingJobHandler } from "./handlers/FailingJobHandler.js";
-import { FlakyJobHandler } from "./handlers/FlakyJobHandler.js";
 
 dotenv.config()
 console.log("Starting Worker...");
@@ -43,15 +41,6 @@ registry.register(
     new EmailJobHandler()
 );
 
-registry.register(
-    JobType.TEST_FAILURE,
-    new FailingJobHandler()
-);
-
-registry.register(
-    JobType.FLAKY_TEST,
-    new FlakyJobHandler(2)
-);
 
 
 const worker = new Worker(

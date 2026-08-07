@@ -1,4 +1,4 @@
-import {Redis }from "ioredis";
+import { Redis } from "ioredis";
 import { RedisKeys } from "../keys/RedisKeys.js";
 import { Job } from "../models/Job.js";
 import { JobMapper } from "../mappers/JobMapper.js";
@@ -90,6 +90,13 @@ export class JobStore {
             this.getKey(jobId),
             filteredJob
         );
+
+        if (redisJob.error === undefined) {
+            await this.redis.hdel(
+                this.getKey(jobId),
+                "error"
+            );
+        }
     }
 
     async delete(jobId: string): Promise<void> {
