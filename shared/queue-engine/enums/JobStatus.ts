@@ -9,5 +9,6 @@ export enum JobStatus {
 
     PERMANENT_FAILURE = "PERMANENT_FAILURE",
 
-    CANCELLED = "CANCELLED"
+    CANCELLED = "CANCELLED",
+
 }
