@@ -19,7 +19,9 @@ describe("Worker Retry", () => {
 
     beforeEach(async () => {
 
-        redis = new Redis();
+        redis = new Redis({
+            db: 1
+        });
 
         queueEngine = new QueueEngine(
             redis,

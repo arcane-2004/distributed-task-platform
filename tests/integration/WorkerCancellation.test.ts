@@ -28,7 +28,9 @@ describe("Worker Cancellation", () => {
 
     beforeEach(async () => {
 
-        redis = new Redis();
+        redis = new Redis({
+            db: 2
+        });
 
         queueEngine = new QueueEngine(
             redis,
@@ -110,6 +112,15 @@ describe("Worker Cancellation", () => {
 
     it("should not execute a job cancelled after worker reads it", async () => {
 
+        const handler = new CancellationTestHandler();
+
+        registry = new HandlerRegistry();
+
+        registry.register(
+            JobType.FLAKY_TEST,
+            handler
+        );
+
         const job = await queueEngine.submit({
             type: JobType.FLAKY_TEST,
             payload: {
@@ -125,23 +136,23 @@ describe("Worker Cancellation", () => {
 
         queueEngine.getJob = async (jobId: string) => {
 
-            const job = await originalGetJob(jobId);
+            const currentJob = await originalGetJob(jobId);
 
-            if (firstRead && job) {
+            if (firstRead && currentJob) {
 
                 firstRead = false;
 
-                // Simulate cancellation happening
-                // immediately after Worker reads the job.
                 await queueEngine.cancelJob(jobId);
+
+                return currentJob;
             }
 
-            return job;
+            return currentJob;
         };
 
         await worker.processOneJob();
 
-        expect(cancellationHandler.executed).toBe(false);
+        expect(handler.executed).toBe(false);
 
         const finalJob = await originalGetJob(job.id);
 
