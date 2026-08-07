@@ -41,5 +41,12 @@ export class Queue {
     async isEmpty(): Promise<boolean> {
         return (await this.size()) === 0;
     }
-
+    
+    async remove(jobId: string): Promise<void> {
+    await this.redis.lrem(
+        this.getQueueKey(),
+        0,
+        jobId
+    );
+}
 }

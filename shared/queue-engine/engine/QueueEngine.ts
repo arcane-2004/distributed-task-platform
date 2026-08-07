@@ -114,6 +114,11 @@ export class QueueEngine {
         await this.queue.enqueue(jobId);
     }
 
+    // ------/ remove job /-------
+    async removeFromQueue(jobId: string): Promise<void> {
+        await this.queue.remove(jobId);
+    }
+
     // -----/ cancle job ------/
     async cancelJob(jobId: string): Promise<void> {
 
@@ -135,5 +140,8 @@ export class QueueEngine {
             status: JobStatus.CANCELLED,
             updatedAt: new Date()
         });
+
+        await this.removeFromQueue(jobId);
     }
+
 }
