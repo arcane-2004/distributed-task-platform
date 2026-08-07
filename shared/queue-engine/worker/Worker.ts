@@ -41,6 +41,16 @@ export class Worker {
             return;
         }
 
+        const latestJob = await this.queueEngine.getJob(jobId);
+
+        if (!latestJob) {
+            return;
+        }
+
+        if (latestJob.status === JobStatus.CANCELLED) {
+            return;
+        }
+
         const now = new Date();
 
         job.status = JobStatus.RUNNING;

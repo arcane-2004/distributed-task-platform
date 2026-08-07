@@ -108,6 +108,47 @@ describe("Worker Cancellation", () => {
         expect(cancelledJob?.status).toBe(JobStatus.CANCELLED);
     });
 
+    it("should not execute a job cancelled after worker reads it", async () => {
+
+        const job = await queueEngine.submit({
+            type: JobType.FLAKY_TEST,
+            payload: {
+                message: "race condition test"
+            },
+            priority: JobPriority.NORMAL,
+            maxAttempts: 3
+        });
+
+        const originalGetJob = queueEngine.getJob.bind(queueEngine);
+
+        let firstRead = true;
+
+        queueEngine.getJob = async (jobId: string) => {
+
+            const job = await originalGetJob(jobId);
+
+            if (firstRead && job) {
+
+                firstRead = false;
+
+                // Simulate cancellation happening
+                // immediately after Worker reads the job.
+                await queueEngine.cancelJob(jobId);
+            }
+
+            return job;
+        };
+
+        await worker.processOneJob();
+
+        expect(cancellationHandler.executed).toBe(false);
+
+        const finalJob = await originalGetJob(job.id);
+
+        expect(finalJob).not.toBeNull();
+        expect(finalJob?.status).toBe(JobStatus.CANCELLED);
+    });
+
     afterEach(async () => {
         await redis.flushdb();
         await redis.quit();
