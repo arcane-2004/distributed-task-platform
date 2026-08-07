@@ -1,5 +1,5 @@
-import Redis from "ioredis";
-import { RedisKeys } from "../keys/RedisKeys";
+import {Redis} from "ioredis";
+import {RedisKeys } from "../keys/RedisKeys.js";
 
 export class Queue {
 
