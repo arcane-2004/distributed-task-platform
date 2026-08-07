@@ -7,6 +7,7 @@ import { HandlerRegistry } from "../../shared/queue-engine/handlers/HandlerRegis
 import { JobType } from "../../shared/queue-engine/enums/JobType.js";
 import { JobPriority } from "../../shared/queue-engine/enums/JobPriority.js";
 import { FailingJobHandler } from "../../apps/worker/src/handlers/FailingJobHandler.js";
+import { FlakyJobHandler } from "../../apps/worker/src/handlers/FlakyJobHandler.js";
 import { JobStatus } from "../../shared/queue-engine/enums/JobStatus.js";
 
 describe("Worker Retry", () => {
@@ -30,6 +31,11 @@ describe("Worker Retry", () => {
         registry.register(
             JobType.TEST_FAILURE,
             new FailingJobHandler()
+        );
+
+        registry.register(
+            JobType.FLAKY_TEST,
+            new FlakyJobHandler(2)
         );
 
         worker = new Worker(
@@ -123,7 +129,56 @@ describe("Worker Retry", () => {
 
         expect(nextJobId).toBeNull();
 
+
     });
+
+    it("should retry a flaky job until it succeeds", async () => {
+
+        const job = await queueEngine.submit({
+            type: JobType.FLAKY_TEST,
+            payload: {
+                message: "flaky job test"
+            },
+            priority: JobPriority.NORMAL,
+            maxAttempts: 3
+        });
+
+        // Attempt 1 → failure
+        await worker.processOneJob();
+
+        let updatedJob = await queueEngine.getJob(job.id);
+
+        expect(updatedJob).not.toBeNull();
+        expect(updatedJob?.attempts).toBe(1);
+        expect(updatedJob?.status).toBe(JobStatus.FAILED);
+
+        // Attempt 2 → failure
+        await worker.processOneJob();
+
+        updatedJob = await queueEngine.getJob(job.id);
+
+        expect(updatedJob).not.toBeNull();
+        expect(updatedJob?.attempts).toBe(2);
+        expect(updatedJob?.status).toBe(JobStatus.FAILED);
+
+        // Attempt 3 → success
+        await worker.processOneJob();
+
+        updatedJob = await queueEngine.getJob(job.id);
+
+        expect(updatedJob).not.toBeNull();
+        expect(updatedJob?.status).toBe(JobStatus.COMPLETED);
+        expect(updatedJob?.attempts).toBe(2);
+        expect(updatedJob?.progress).toBe(100);
+        expect(updatedJob?.error).toBeUndefined();
+        expect(updatedJob?.completedAt).toBeDefined();
+
+        const nextJobId = await queueEngine.getNextJobId();
+
+        expect(nextJobId).toBeNull();
+    });
+
+
 
     afterEach(async () => {
         await redis.flushdb();

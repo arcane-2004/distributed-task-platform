@@ -7,7 +7,7 @@ export class FlakyJobHandler implements JobHandler {
 
     constructor(
         private readonly failuresBeforeSuccess: number
-    ) {}
+    ) { }
 
     async execute(
         job: Job,
@@ -17,6 +17,10 @@ export class FlakyJobHandler implements JobHandler {
         this.attempts++;
 
         await updateProgress(10);
+
+        console.log(
+            `FlakyJobHandler execution #${this.attempts}`
+        );
 
         if (this.attempts <= this.failuresBeforeSuccess) {
             throw new Error(
