@@ -37,6 +37,9 @@ export class Worker {
             return;
         }
 
+        if (job.status === JobStatus.CANCELLED) {
+            return;
+        }
 
         const now = new Date();
 
