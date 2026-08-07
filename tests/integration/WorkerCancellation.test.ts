@@ -1,0 +1,79 @@
+import { Redis } from "ioredis";
+
+import { beforeEach, afterEach, describe, expect, it } from "vitest";
+import { QueueEngine } from "../../shared/queue-engine/engine/QueueEngine.js";
+import { Worker } from "../../shared/queue-engine/worker/Worker.js";
+import { HandlerRegistry } from "../../shared/queue-engine/handlers/HandlerRegistry.js";
+import { JobType } from "../../shared/queue-engine/enums/JobType.js";
+import { JobPriority } from "../../shared/queue-engine/enums/JobPriority.js";
+import { FailingJobHandler } from "../../apps/worker/src/handlers/FailingJobHandler.js";
+import { FlakyJobHandler } from "../../apps/worker/src/handlers/FlakyJobHandler.js";
+import { JobStatus } from "../../shared/queue-engine/enums/JobStatus.js";
+
+describe("Worker Retry", () => {
+
+    let redis: Redis;
+    let queueEngine: QueueEngine;
+    let registry: HandlerRegistry;
+    let worker: Worker;
+
+    beforeEach(async () => {
+
+        redis = new Redis();
+
+        queueEngine = new QueueEngine(
+            redis,
+            "test-retry-queue"
+        );
+
+        registry = new HandlerRegistry();
+
+        registry.register(
+            JobType.TEST_FAILURE,
+            new FailingJobHandler()
+        );
+
+        registry.register(
+            JobType.FLAKY_TEST,
+            new FlakyJobHandler(2)
+        );
+
+        worker = new Worker(
+            queueEngine,
+            registry,
+            100,
+            10
+        );
+    });
+
+    it("should cancel a queued job", async () => {
+
+        const job = await queueEngine.submit({
+            type: JobType.FLAKY_TEST,
+            payload: {
+                message: "cancellation test"
+            },
+            priority: JobPriority.NORMAL,
+            maxAttempts: 3
+        });
+
+        const queuedJob = await queueEngine.getJob(job.id);
+
+        expect(queuedJob).not.toBeNull();
+        expect(queuedJob?.status).toBe(JobStatus.QUEUED);
+
+        await queueEngine.cancelJob(job.id);
+
+        const cancelledJob = await queueEngine.getJob(job.id);
+
+        expect(cancelledJob).not.toBeNull();
+        expect(cancelledJob?.status).toBe(JobStatus.CANCELLED);
+    });
+
+
+    afterEach(async () => {
+        await redis.flushdb();
+        await redis.quit();
+    });
+
+});
