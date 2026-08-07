@@ -57,6 +57,34 @@ describe("Worker Retry", () => {
         expect(updatedJob?.attempts).toBe(1);
     });
 
+    it("should increment attempts across retries", async () => {
+
+        const job = await queueEngine.submit({
+            type: JobType.TEST_FAILURE,
+            payload: {
+                message: "multiple retry test"
+            },
+            priority: JobPriority.NORMAL,
+            maxAttempts: 3
+        });
+
+        // First attempt
+        await worker.processOneJob();
+
+        let updatedJob = await queueEngine.getJob(job.id);
+
+        expect(updatedJob).not.toBeNull();
+        expect(updatedJob?.attempts).toBe(1);
+
+        // Second attempt
+        await worker.processOneJob();
+
+        updatedJob = await queueEngine.getJob(job.id);
+
+        expect(updatedJob).not.toBeNull();
+        expect(updatedJob?.attempts).toBe(2);
+    });
+
     afterEach(async () => {
         await redis.flushdb();
         await redis.quit();
