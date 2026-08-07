@@ -6,4 +6,6 @@ export enum JobType {
     AI_IMAGE_ANALYSIS = "AI_IMAGE_ANALYSIS",
 
     TEST_FAILURE = "TEST_FAILURE",
+
+    FLAKY_TEST = "FLAKY_TEST",
 }
