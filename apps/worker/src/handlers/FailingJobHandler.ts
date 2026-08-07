@@ -1,5 +1,5 @@
-import { Job } from "../models/Job.js";
-import { JobHandler } from "./JobHandler.js";
+import { Job } from "../../../../shared/queue-engine/models/Job.js";
+import { JobHandler } from "../../../../shared/queue-engine/handlers/JobHandler.js";
 
 export class FailingJobHandler implements JobHandler {
 

@@ -3,8 +3,11 @@ import dotenv from 'dotenv'
 import { QueueEngine } from "../../../shared/queue-engine/engine/QueueEngine.js";
 import { HandlerRegistry } from "../../../shared/queue-engine/handlers/HandlerRegistry.js";
 import { JobType } from "../../../shared/queue-engine/enums/JobType.js";
-import { EmailJobHandler } from "./handlers/EmailJobHandler.js";
+
 import { Worker } from "../../../shared/queue-engine/worker/Worker.js";
+
+import { EmailJobHandler } from "./handlers/EmailJobHandler.js";
+import { FailingJobHandler } from "./handlers/FailingJobHandler.js";
 
 dotenv.config()
 console.log("Starting Worker...");
@@ -32,13 +35,18 @@ const queueEngine = new QueueEngine(
 console.log("QueueEngine initialized");
 
 const registry = new HandlerRegistry();
+console.log("HandlerRegistry initialized");
 
 registry.register(
     JobType.EMAIL,
     new EmailJobHandler()
 );
 
-console.log("HandlerRegistry initialized");
+registry.register(
+    JobType.TEST_FAILURE,
+    new FailingJobHandler()
+);
+
 
 const worker = new Worker(
     queueEngine,
