@@ -36,7 +36,9 @@ const job: Job = {
 
     createdAt: new Date(),
 
-    updatedAt: new Date()
+    updatedAt: new Date(),
+
+    queuedAt: new Date(),
 
 };
 
