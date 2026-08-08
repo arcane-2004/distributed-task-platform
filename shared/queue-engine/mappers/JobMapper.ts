@@ -1,8 +1,8 @@
 import { Job } from "../models/Job.js";
 import { RedisJobHash } from "../types/RedisJobHash.js";
-import {JobType} from "../enums/JobType.js"
-import {JobPriority} from "../enums/JobPriority.js"
-import {JobStatus} from "../enums/JobStatus.js"
+import { JobType } from "../enums/JobType.js"
+import { JobPriority } from "../enums/JobPriority.js"
+import { JobStatus } from "../enums/JobStatus.js"
 
 export class JobMapper {
 
@@ -82,7 +82,9 @@ export class JobMapper {
 
             createdAt: new Date(hash.createdAt),
 
-            queuedAt: new Date(hash.queuedAt),
+            queuedAt: hash.queuedAt
+                ? new Date(hash.queuedAt)
+                : new Date(hash.createdAt),
 
             updatedAt: new Date(hash.updatedAt),
 
