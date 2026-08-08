@@ -1,12 +1,12 @@
-import {Redis} from "ioredis";
-import {RedisKeys } from "../keys/RedisKeys.js";
+import { Redis } from "ioredis";
+import { RedisKeys } from "../keys/RedisKeys.js";
 
 export class Queue {
 
     constructor(
         private readonly redis: Redis,
         private readonly queueName: string
-    ) {}
+    ) { }
 
     private getQueueKey(): string {
         return RedisKeys.queue(this.queueName);
@@ -41,12 +41,20 @@ export class Queue {
     async isEmpty(): Promise<boolean> {
         return (await this.size()) === 0;
     }
-    
+
     async remove(jobId: string): Promise<void> {
-    await this.redis.lrem(
-        this.getQueueKey(),
-        0,
-        jobId
-    );
-}
+        await this.redis.lrem(
+            this.getQueueKey(),
+            0,
+            jobId
+        );
+    }
+
+    async getAll(): Promise<string[]> {
+        return await this.redis.lrange(
+            this.getQueueKey(),
+            0,
+            -1
+        );
+    }
 }
