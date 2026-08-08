@@ -8,7 +8,7 @@ import { JobStatus } from "../enums/JobStatus.js";
 
 import { Job } from "../models/Job.js";
 import { SubmitJobRequest } from "../models/SubmitJobRequest.js";
-import { getPriorityValue } from "../utils/PriorityUtils.js";
+import { getEffectivePriority} from "../utils/PriorityUtils.js";
 
 
 
@@ -76,7 +76,7 @@ export class QueueEngine {
         return await this.jobStore.findById(jobId);
     }
 
-    // -----/ next job /-------
+    // -----/ get next job /-------
     async getNextJobId(): Promise<string | null> {
 
         const jobIds = await this.queue.getAll();
@@ -100,7 +100,10 @@ export class QueueEngine {
                 continue;
             }
 
-            const priority = getPriorityValue(job.priority);
+            const priority = getEffectivePriority(
+                job.priority,
+                job.queuedAt
+            );
 
             if (priority > highestPriority) {
                 highestPriority = priority;
