@@ -247,4 +247,75 @@ describe("Queue Priority", () => {
         expect(nextJobId).toBe(olderJob.id);
     });
 
+    it("should prevent starvation by aging an old low-priority job", async () => {
+
+        const lowPriorityJob = await queueEngine.submit({
+            type: JobType.EMAIL,
+            payload: {
+                message: "old low priority"
+            },
+            priority: JobPriority.LOW
+        });
+
+        // Make the LOW priority job appear to have waited
+        // for more than 20 seconds.
+        const oldQueuedAt = new Date(
+            Date.now() - 21_000
+        );
+
+        await queueEngine.updateJob(
+            lowPriorityJob.id,
+            {
+                queuedAt: oldQueuedAt
+            }
+        );
+
+        const highPriorityJob = await queueEngine.submit({
+            type: JobType.EMAIL,
+            payload: {
+                message: "new high priority"
+            },
+            priority: JobPriority.HIGH
+        });
+
+        const nextJobId = await queueEngine.getNextJobId();
+
+        expect(nextJobId).toBe(lowPriorityJob.id);
+    });
+
+    it("should still prefer a newer high-priority job when low-priority aging is insufficient", async () => {
+
+        const lowPriorityJob = await queueEngine.submit({
+            type: JobType.EMAIL,
+            payload: {
+                message: "low priority"
+            },
+            priority: JobPriority.LOW
+        });
+
+        // Only 5 seconds old → no aging level.
+        const queuedAt = new Date(
+            Date.now() - 5_000
+        );
+
+        await queueEngine.updateJob(
+            lowPriorityJob.id,
+            {
+                queuedAt
+            }
+        );
+
+        const highPriorityJob = await queueEngine.submit({
+            type: JobType.EMAIL,
+            payload: {
+                message: "high priority"
+            },
+            priority: JobPriority.HIGH
+        });
+
+        const nextJobId = await queueEngine.getNextJobId();
+
+        expect(nextJobId).toBe(highPriorityJob.id);
+    });
+
 });
