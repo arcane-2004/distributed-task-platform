@@ -43,7 +43,7 @@ export class JobMapper {
 
             updatedAt: job.updatedAt.toISOString(),
 
-            queuedAt: job.updatedAt.toISOString(),
+            queuedAt: job.queuedAt.toISOString(),
 
             startedAt: job.startedAt?.toISOString(),
 
