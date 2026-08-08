@@ -40,7 +40,9 @@ describe("Worker Priority", () => {
 
     beforeEach(async () => {
 
-        redis = new Redis();
+        redis = new Redis({
+            db:5
+        });
 
         queueEngine = new QueueEngine(
             redis,

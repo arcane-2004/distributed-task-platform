@@ -111,6 +111,14 @@ export class Worker {
                     `Retrying job ${job.id} (${job.attempts}/${job.maxAttempts})`
                 );
 
+                await this.queueEngine.updateJob(
+                    job.id,
+                    {
+                        status: JobStatus.QUEUED,
+                        updatedAt: new Date()
+                    }
+                );
+
                 await this.sleep(this.retryDelayMs);
 
                 await this.queueEngine.enqueueJob(job.id);

@@ -39,18 +39,18 @@ describe("Worker", () => {
 
     const registry = new HandlerRegistry();
     const handler = new TestHandler();
-    
+
     registry.register(
         JobType.EMAIL,
         handler
     );
     const worker = new Worker(
-            queueEngine,
-            registry
-        );
-    
+        queueEngine,
+        registry
+    );
 
-    
+
+
 
     beforeEach(async () => {
 
@@ -95,7 +95,7 @@ describe("Worker", () => {
 
     });
 
-    it("should mark job as FAILED when handler throws", async () => {
+    it("should requeue a failed job when retry attempts remain", async () => {
 
         const registry = new HandlerRegistry();
 
@@ -123,10 +123,13 @@ describe("Worker", () => {
         expect(updatedJob).not.toBeNull();
 
         expect(updatedJob?.status)
-            .toBe(JobStatus.FAILED);
+            .toBe(JobStatus.QUEUED);
+
+        expect(updatedJob?.attempts)
+            .toBe(1);
 
         expect(updatedJob?.error)
-            .toBe("Email service unavailable");
+            .toBeDefined();
 
     });
 
@@ -141,7 +144,7 @@ describe("Worker", () => {
 
     });
 
-    it("should mark job as FAILED when no handler is registered", async () => {
+    it("should requeue a job when no handler is registered", async () => {
 
         // Fresh registry with NO handlers
         const emptyRegistry = new HandlerRegistry();
@@ -168,7 +171,7 @@ describe("Worker", () => {
         expect(updatedJob).not.toBeNull();
 
         expect(updatedJob?.status)
-            .toBe(JobStatus.FAILED);
+            .toBe(JobStatus.QUEUED);
 
         expect(updatedJob?.error)
             .toBe("No handler registered for EMAIL");

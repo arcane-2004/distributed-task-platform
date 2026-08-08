@@ -1,5 +1,6 @@
 import { Redis } from "ioredis";
 
+import { randomUUID } from "crypto";
 import { beforeEach, afterEach, describe, expect, it } from "vitest";
 import { QueueEngine } from "../../shared/queue-engine/engine/QueueEngine.js";
 import { Worker } from "../../shared/queue-engine/worker/Worker.js";
@@ -25,7 +26,7 @@ describe("Worker Retry", () => {
 
         queueEngine = new QueueEngine(
             redis,
-            "test-retry-queue"
+            `test-retry-queue-${randomUUID()}`
         );
 
         registry = new HandlerRegistry();
@@ -152,7 +153,7 @@ describe("Worker Retry", () => {
 
         expect(updatedJob).not.toBeNull();
         expect(updatedJob?.attempts).toBe(1);
-        expect(updatedJob?.status).toBe(JobStatus.FAILED);
+        expect(updatedJob?.status).toBe(JobStatus.QUEUED);
 
         // Attempt 2 → failure
         await worker.processOneJob();
@@ -161,7 +162,7 @@ describe("Worker Retry", () => {
 
         expect(updatedJob).not.toBeNull();
         expect(updatedJob?.attempts).toBe(2);
-        expect(updatedJob?.status).toBe(JobStatus.FAILED);
+        expect(updatedJob?.status).toBe(JobStatus.QUEUED);
 
         // Attempt 3 → success
         await worker.processOneJob();

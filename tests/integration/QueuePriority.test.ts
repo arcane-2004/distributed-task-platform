@@ -19,7 +19,9 @@ describe("Queue Priority", () => {
 
     beforeEach(async () => {
 
-        redis = new Redis();
+        redis = new Redis({
+            db: 4
+        });
 
         queueEngine = new QueueEngine(
             redis,
@@ -142,4 +144,81 @@ describe("Queue Priority", () => {
 
         expect(nextJobId).toBe(lowJob.id);
     });
+
+    it("should process jobs by priority while preserving FIFO within each priority", async () => {
+
+        const normal1 = await queueEngine.submit({
+            type: JobType.EMAIL,
+            payload: {
+                message: "normal-1"
+            },
+            priority: JobPriority.NORMAL
+        });
+
+        const high1 = await queueEngine.submit({
+            type: JobType.EMAIL,
+            payload: {
+                message: "high-1"
+            },
+            priority: JobPriority.HIGH
+        });
+
+        const normal2 = await queueEngine.submit({
+            type: JobType.EMAIL,
+            payload: {
+                message: "normal-2"
+            },
+            priority: JobPriority.NORMAL
+        });
+
+        const high2 = await queueEngine.submit({
+            type: JobType.EMAIL,
+            payload: {
+                message: "high-2"
+            },
+            priority: JobPriority.HIGH
+        });
+
+        const low1 = await queueEngine.submit({
+            type: JobType.EMAIL,
+            payload: {
+                message: "low-1"
+            },
+            priority: JobPriority.LOW
+        });
+
+
+        const processed: string[] = [];
+
+
+        processed.push(
+            (await queueEngine.getNextJobId())!
+        );
+
+        processed.push(
+            (await queueEngine.getNextJobId())!
+        );
+
+        processed.push(
+            (await queueEngine.getNextJobId())!
+        );
+
+        processed.push(
+            (await queueEngine.getNextJobId())!
+        );
+
+        processed.push(
+            (await queueEngine.getNextJobId())!
+        );
+
+
+        expect(processed).toEqual([
+            high1.id,
+            high2.id,
+            normal1.id,
+            normal2.id,
+            low1.id
+        ]);
+    });
+
 });
