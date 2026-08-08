@@ -221,4 +221,30 @@ describe("Queue Priority", () => {
         ]);
     });
 
+    it("should process older job first when effective priorities are equal", async () => {
+
+        const olderJob = await queueEngine.submit({
+            type: JobType.EMAIL,
+            payload: {
+                message: "older"
+            },
+            priority: JobPriority.NORMAL
+        });
+
+        // Make the first job older
+        await new Promise(resolve => setTimeout(resolve, 5));
+
+        const newerJob = await queueEngine.submit({
+            type: JobType.EMAIL,
+            payload: {
+                message: "newer"
+            },
+            priority: JobPriority.NORMAL
+        });
+
+        const nextJobId = await queueEngine.getNextJobId();
+
+        expect(nextJobId).toBe(olderJob.id);
+    });
+
 });
