@@ -58,7 +58,9 @@ export class QueueEngine {
 
             createdAt: now,
 
-            updatedAt: now
+            updatedAt: now,
+
+            queuedAt: now,
         };
         await this.jobStore.create(job);
 

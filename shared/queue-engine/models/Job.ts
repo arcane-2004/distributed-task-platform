@@ -31,6 +31,8 @@ export interface Job<T = unknown> {
 
     updatedAt: Date;
 
+    queuedAt: Date;
+
     startedAt?: Date;
 
     completedAt?: Date;

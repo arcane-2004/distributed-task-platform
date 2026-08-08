@@ -27,6 +27,8 @@ export interface RedisJobHash {
 
     updatedAt: string;
 
+    queuedAt: string;
+
     startedAt?: string;
 
     completedAt?: string;

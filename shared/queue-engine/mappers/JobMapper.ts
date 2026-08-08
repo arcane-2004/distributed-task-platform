@@ -43,6 +43,8 @@ export class JobMapper {
 
             updatedAt: job.updatedAt.toISOString(),
 
+            queuedAt: job.updatedAt.toISOString(),
+
             startedAt: job.startedAt?.toISOString(),
 
             completedAt: job.completedAt?.toISOString(),
@@ -79,6 +81,8 @@ export class JobMapper {
             workerId: hash.workerId,
 
             createdAt: new Date(hash.createdAt),
+
+            queuedAt: new Date(hash.queuedAt),
 
             updatedAt: new Date(hash.updatedAt),
 
